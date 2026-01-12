@@ -1,0 +1,19 @@
+---
+title: "test"
+author: "kim soyeon"
+date: "2026-01-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+# install.packages("devtools")  # 없으면 한 번만
+devtools::install_github("JBUH-skin-microbiome/jbsmRpackage")
+library(jbsmRpackage)
+
+```
