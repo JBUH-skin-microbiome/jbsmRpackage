@@ -20,5 +20,4 @@ A negation of the \code{\%in\%} operator.
 }
 \examples{
 1:5 \%!in\% c(1, 3, 5)
-
 }
