@@ -16,4 +16,8 @@ knitr::opts_chunk$set(echo = TRUE)
 devtools::install_github("JBUH-skin-microbiome/jbsmRpackage")
 library(jbsmRpackage)
 
+`%!in%`
+get_utils
+lfc_num
+abc2_plot
 ```

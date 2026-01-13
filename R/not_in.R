@@ -10,7 +10,6 @@
 #'
 #' @examples
 #' 1:5 %!in% c(1, 3, 5)
-#'
 #' @export
 '%!in%' <- function(x, y) {
   !(x %in% y)
