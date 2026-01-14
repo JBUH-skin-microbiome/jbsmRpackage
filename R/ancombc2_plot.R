@@ -1,25 +1,14 @@
-library(tidyverse)
-
-### Util functions -------------------------------------------------------------
-
-get_utils <- function(data, prefix=NULL, var=NULL){
-  # Diff columns
-  diff_cols <- grep(
-    paste0(prefix, var),
-    colnames(data), value = TRUE
-  )
-
-  # Error coding
-  if (length(diff_cols) == 0) {
-    stop("No significant values found for variable: ", var)
-  } else {
-    groups <- stringr::str_remove(diff_cols, paste0(prefix, var))
-  }
-
-  list(diff_cols = diff_cols, groups = groups)
-}
-
-
+#' Plot ANCOM-BC2 results
+#'
+#' @param data ANCOM-BC2 result list
+#' @param var variable name
+#' @param title plot title
+#' @param col_sig color for significant taxa
+#' @param non_sig color for non-significant taxa
+#' @param method analysis method
+#'
+#' @return ggplot object
+#' @export
 ### Results for numerical variables --------------------------------------------
 
 lfc_num <- function(data_prim, variable, sig_color = "#0FA060", nonsig_color = "black",
