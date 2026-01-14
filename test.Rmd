@@ -13,11 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # install.packages("devtools")  # 없으면 한 번만
-devtools::install_github("JBUH-skin-microbiome/jbsmRpackage")
+devtools::install_github("JBUH-skin-microbiome/jbsmRpackage", force = T)
 library(jbsmRpackage)
 
-`%!in%`
-get_utils
-lfc_num
-abc2_plot
+
 ```

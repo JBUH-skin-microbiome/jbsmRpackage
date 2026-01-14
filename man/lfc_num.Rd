@@ -2,7 +2,7 @@
 % Please edit documentation in R/ancombc2_plot.R
 \name{lfc_num}
 \alias{lfc_num}
-\title{Plot ANCOM-BC2 results}
+\title{Plot log fold changes for numerical variables}
 \usage{
 lfc_num(
   data_prim,
@@ -13,21 +13,21 @@ lfc_num(
 )
 }
 \arguments{
-\item{data}{ANCOM-BC2 result list}
+\item{data_prim}{Primary ANCOM-BC2 result table.}
 
-\item{var}{variable name}
+\item{variable}{Character string specifying the variable name.}
 
-\item{title}{plot title}
+\item{sig_color}{Color for robustly significant taxa.}
 
-\item{col_sig}{color for significant taxa}
+\item{nonsig_color}{Color for non-significant taxa.}
 
-\item{non_sig}{color for non-significant taxa}
-
-\item{method}{analysis method}
+\item{title_prefix}{Prefix for the plot title.}
 }
 \value{
-ggplot object
+A \code{ggplot} object.
 }
 \description{
-Plot ANCOM-BC2 results
+Generates a bar plot with error bars showing log fold changes
+associated with a one-unit increase in a numerical variable.
 }
+\keyword{internal}
