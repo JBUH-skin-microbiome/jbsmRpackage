@@ -1,16 +1,74 @@
-#' Plot ANCOM-BC2 results
+#' Visualize ANCOM-BC2 results as publication-ready plots
 #'
-#' @param data ANCOM-BC2 result list
-#' @param var variable name
-#' @param title plot title
-#' @param col_sig color for significant taxa
-#' @param non_sig color for non-significant taxa
-#' @param method analysis method
+#' This function provides a unified visualization interface for ANCOM-BC2
+#' results, supporting numerical and categorical variables across multiple
+#' analysis modes including primary, Dunnett, pairwise, global, and trend tests.
 #'
-#' @return ggplot object
+#' @param data A list object returned by ANCOM-BC2, containing result tables
+#'   such as \code{res}, \code{res_dunn}, \code{res_pair}, \code{res_global},
+#'   and \code{res_trend}.
+#' @param var Character string specifying the variable name to visualize.
+#' @param title Optional plot title.
+#' @param col_sig Color used to highlight statistically significant taxa.
+#' @param non_sig Color used for non-significant taxa.
+#' @param method Analysis method to visualize. One of
+#'   \code{"primary"}, \code{"dunnett"}, \code{"pairwise"},
+#'   \code{"global"}, or \code{"trend"}.
+#'
+#' @return A \code{ggplot} object.
+#'
+#' @examples
+#' \dontrun{
+#' abc2_plot(
+#'   data = ancombc2_res,
+#'   var = "BMI",
+#'   method = "global",
+#'   title = "BMI-associated taxa"
+#' )
+#' }
+#'
 #' @export
-### Results for numerical variables --------------------------------------------
+abc2_plot <- function(data, var=NULL, title="", col_sig="#0FA060", non_sig="black",
+                      method=c("primary", "dunnett", "global", "pairwise", "trend")){
+  if (!missing(method)) {
+    method <- tolower(method) %>% ifelse(.=='pattern', 'trend', .)
+  }
 
+  method <- match.arg(method)
+  var_num = grepl(paste0(var, "$"), colnames(data$res)) %>% sum() > 0
+
+  if (var_num) {
+    fig <- lfc_num(data$res, var, sig_color=col_sig, nonsig_color=non_sig)
+  } else {
+    fig <- switch(
+      method,
+      primary  = lfc_cat(data$res, var, title, col_sig, non_sig),
+      dunnett  = lfc_cat(data$res_dunn, var, title, col_sig, non_sig),
+      pairwise = lfc_cat(data$res_pair, var, title, col_sig, non_sig),
+      global   = lfc_global(data$res, data$res_global, var, title, col_sig, non_sig),
+      trend    = lfc_trend(data$res_trend, var, title, col_sig, non_sig)
+    ) %>% get_plot(., method, title=title)
+  }
+
+  return(fig)
+}
+
+
+
+#' Plot log fold changes for numerical variables
+#'
+#' Generates a bar plot with error bars showing log fold changes
+#' associated with a one-unit increase in a numerical variable.
+#'
+#' @param data_prim Primary ANCOM-BC2 result table.
+#' @param variable Character string specifying the variable name.
+#' @param sig_color Color for robustly significant taxa.
+#' @param nonsig_color Color for non-significant taxa.
+#' @param title_prefix Prefix for the plot title.
+#'
+#' @return A \code{ggplot} object.
+#'
+#' @keywords internal
 lfc_num <- function(data_prim, variable, sig_color = "#0FA060", nonsig_color = "black",
                     title_prefix = "Log fold changes as one unit increase of") {
 
@@ -57,9 +115,22 @@ lfc_num <- function(data_prim, variable, sig_color = "#0FA060", nonsig_color = "
   return(fig)
 }
 
-### Results for categorical variables ------------------------------------------
-# shared between primary, dunnett, and multiple pairwise
 
+
+#' Prepare categorical log fold change results
+#'
+#' Processes categorical ANCOM-BC2 results and returns a tidy data frame
+#' for downstream visualization.
+#'
+#' @param data_else ANCOM-BC2 result table for categorical comparisons.
+#' @param variable Character string specifying the variable name.
+#' @param title Optional title (not used internally).
+#' @param sig_color Color for robustly significant taxa.
+#' @param nonsig_color Color for non-significant taxa.
+#'
+#' @return A data frame with taxon, group, value, and color columns.
+#'
+#' @keywords internal
 lfc_cat <- function(data_else, variable, title = NULL,
                     sig_color = "#0FA060", nonsig_color = "black") {
 
@@ -100,8 +171,21 @@ lfc_cat <- function(data_else, variable, title = NULL,
 }
 
 
-### Results for global test ----------------------------------------------------
-
+#' Prepare global test log fold change results
+#'
+#' Combines primary and global ANCOM-BC2 results to generate
+#' a tidy data frame for global differential abundance visualization.
+#'
+#' @param data_prim Primary ANCOM-BC2 result table.
+#' @param data_glob Global ANCOM-BC2 result table.
+#' @param variable Character string specifying the variable name.
+#' @param title Optional title (not used internally).
+#' @param sig_color Color for robustly significant taxa.
+#' @param nonsig_color Color for non-significant taxa.
+#'
+#' @return A data frame with taxon, group, value, and color columns.
+#'
+#' @keywords internal
 lfc_global <- function(data_prim, data_glob, variable, title = NULL,
                        sig_color = "#0FA060", nonsig_color = "black") {
 
@@ -130,8 +214,20 @@ lfc_global <- function(data_prim, data_glob, variable, title = NULL,
 }
 
 
-### Pattern Analysis -----------------------------------------------------------
-
+#' Prepare trend analysis log fold change results
+#'
+#' Processes trend-based ANCOM-BC2 results to generate a tidy
+#' data frame suitable for heatmap-style visualization.
+#'
+#' @param data_trend ANCOM-BC2 trend result table.
+#' @param variable Character string specifying the variable name.
+#' @param title Optional title (not used internally).
+#' @param sig_color Color for robustly significant taxa.
+#' @param nonsig_color Color for non-significant taxa.
+#'
+#' @return A data frame with taxon, group, value, and color columns.
+#'
+#' @keywords internal
 lfc_trend <- function(data_trend, variable, title = title,
                       sig_color = "#0FA060", nonsig_color = "black") {
 
@@ -151,8 +247,20 @@ lfc_trend <- function(data_trend, variable, title = title,
 }
 
 
-### Visualization --------------------------------------------------------------
 
+#' Generate heatmap-style visualization for ANCOM-BC2 results
+#'
+#' Internal plotting function that converts a tidy result data frame
+#' into a heatmap-style ggplot object.
+#'
+#' @param df_fig Tidy data frame produced by internal lfc_* functions.
+#' @param method Analysis method used (primary, global, trend, etc.).
+#' @param title Plot title.
+#' @param text_size Size of text labels.
+#'
+#' @return A \code{ggplot} object.
+#'
+#' @keywords internal
 get_plot <- function(df_fig, method, title=title, text_size=4){
   max.abs = ceiling(max(abs(df_fig$value)))
   fig.tmp = df_fig %>%
@@ -186,34 +294,3 @@ get_plot <- function(df_fig, method, title=title, text_size=4){
 
   return(fig)
 }
-
-
-### Integrated Function --------------------------------------------------------
-
-abc2_plot <- function(data, var=NULL, title="", col_sig="#0FA060", non_sig="black",
-                      method=c("primary", "dunnett", "global", "pairwise", "trend")){
-
-  if (!missing(method)) {
-    method <- tolower(method) %>% ifelse(.=='pattern', 'trend', .)
-  }
-
-  method <- match.arg(method)
-  var_num = grepl(paste0(var, "$"), colnames(data$res)) %>% sum() > 0
-
-  if (var_num) {
-    fig <- lfc_num(data$res, var, sig_color=col_sig, nonsig_color=non_sig)
-  } else {
-    fig <- switch(
-      method,
-      primary  = lfc_cat(data$res, var, title, col_sig, non_sig),
-      dunnett  = lfc_cat(data$res_dunn, var, title, col_sig, non_sig),
-      pairwise = lfc_cat(data$res_pair, var, title, col_sig, non_sig),
-      global   = lfc_global(data$res, data$res_global, var, title, col_sig, non_sig),
-      trend    = lfc_trend(data$res_trend, var, title, col_sig, non_sig)
-    ) %>% get_plot(., method, title=title)
-  }
-
-  return(fig)
-}
-
-
