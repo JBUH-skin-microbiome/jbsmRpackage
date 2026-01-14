@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # install.packages("devtools")  # 없으면 한 번만
 devtools::install_github("JBUH-skin-microbiome/jbsmRpackage", force = T)
 library(jbsmRpackage)
-
-
+jbsmRpackage::abc2_plot
 ```
+
+
