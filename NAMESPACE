@@ -2,3 +2,5 @@
 
 export("%!in%")
 export(abc2_plot)
+export(make_pptx)
+export(save_gg_pptx)
